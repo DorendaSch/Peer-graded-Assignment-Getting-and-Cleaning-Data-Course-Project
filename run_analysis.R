@@ -3,7 +3,7 @@ dataset_url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FU
 download.file(dataset_url, "Samsung.zip")
 unzip("Samsung.zip", exdir = "samsung")
 
-#2. read in all the relevant datasets
+#2. Read in all the relevant datasets
 #test
 setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project/samsung/UCI HAR Dataset/test")
   x_test <- read.table('X_test.txt')
@@ -15,33 +15,34 @@ setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project
   y_train <- read.table('y_train.txt')
   subject_train<-read.table('subject_train.txt')
 
-#3. merge test and train data
+#3. Merge test and train data
   x_data <- rbind(x_train, x_test)
   y_data <- rbind(y_train, y_test)
   s_data <- rbind(subject_train, subject_test)
 
-#4. read in feature and activity labels data
+#4. Read in feature and activity labels data
 setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project/samsung/UCI HAR Dataset")
   feature <- read.table('features.txt')
   a_label <- read.table('activity_labels.txt')
   a_label[,2] <- as.character(a_label[,2])
 
-#5. extract only mean and standard deviation for each measurement 
+#5. Extract only mean and standard deviation for each measurement 
   selectedCols <- grep("-(mean|std).*", as.character(feature[,2]))
   selectedColNames <- feature[selectedCols, 2]  
   selectedColNames <- gsub("-mean", "Mean", selectedColNames)
   selectedColNames <- gsub("-std", "Std", selectedColNames)
   selectedColNames <- gsub("[-()]", "", selectedColNames)  
 
-#6. extract correct data, bind
+#6. Extract correct data, bind
   x_data <- x_data[selectedCols]
   allData <- cbind(s_data, y_data, x_data)
-# label columns desciptively 
+
+#7. Label columns and activity names desciptively 
   colnames(allData) <- c("subjectID", "Activity", selectedColNames)
   allData$Activity <- factor(allData$Activity, levels = a_label[,1], labels = a_label[,2])
   allData$subjectID <- as.factor(allData$subjectID)
   
-#7. create a tidy data set
+#8. Create a final tidy data set with average of each variable for each activity and subject
   meltedData <- melt(allData, id = c("subjectID", "Activity"))
   tidyData <- dcast(meltedData, subjectID + Activity ~ variable, mean)
   
