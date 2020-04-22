@@ -19,3 +19,23 @@ setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project
   x_data <- rbind(x_train, x_test)
   y_data <- rbind(y_train, y_test)
   s_data <- rbind(subject_train, subject_test)
+
+#4. read in feature and activity labels data
+setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project/samsung/UCI HAR Dataset")
+  feature <- read.table('features.txt')
+  a_label <- read.table('activity_labels.txt')
+  a_label2 <- as.character(a_label[,2])
+  a_label[,2] <- as.character(a_label[,2])
+
+#5. extract only mean and standard deviation for each measurement 
+  selectedCols <- grep("-(mean|std).*", as.character(feature[,2]))
+  selectedColNames <- feature[selectedCols, 2]  
+  selectedColNames <- gsub("-mean", "Mean", selectedColNames)
+  selectedColNames <- gsub("-std", "Std", selectedColNames)
+  selectedColNames <- gsub("[-()]", "", selectedColNames)  
+
+#6. extract correct data, bind, label columns desciptively
+  x_data <- x_data[selectedCols]
+  allData <- cbind(s_data, y_data, x_data)
+  colnames(allData) <- c("subjectID", "Activity", selectedColNames)
+  
