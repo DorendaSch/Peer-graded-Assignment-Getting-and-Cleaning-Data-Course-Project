@@ -6,14 +6,14 @@ unzip("Samsung.zip", exdir = "samsung")
 #2. read in all the relevant datasets
 #test
 setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project/samsung/UCI HAR Dataset/test")
-  x_test <- read.table('X_test.txt', colClasses = "character")
-  y_test <- read.table('y_test.txt', colClasses = "character")
-  subject_test<-read.table('subject_test.txt', colClasses = "character")
+  x_test <- read.table('X_test.txt')
+  y_test <- read.table('y_test.txt')
+  subject_test<-read.table('subject_test.txt')
 #train
 setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project/samsung/UCI HAR Dataset/train")
-  x_train <- read.table('X_train.txt', colClasses = "character")
-  y_train <- read.table('y_train.txt', colClasses = "character")
-  subject_train<-read.table('subject_train.txt', colClasses = "character")
+  x_train <- read.table('X_train.txt')
+  y_train <- read.table('y_train.txt')
+  subject_train<-read.table('subject_train.txt')
 
 #3. merge test and train data
   x_data <- rbind(x_train, x_test)
@@ -24,7 +24,6 @@ setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project
 setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project/samsung/UCI HAR Dataset")
   feature <- read.table('features.txt')
   a_label <- read.table('activity_labels.txt')
-  a_label2 <- as.character(a_label[,2])
   a_label[,2] <- as.character(a_label[,2])
 
 #5. extract only mean and standard deviation for each measurement 
@@ -34,8 +33,17 @@ setwd("~/RStudio/Peer-graded-Assignment-Getting-and-Cleaning-Data-Course-Project
   selectedColNames <- gsub("-std", "Std", selectedColNames)
   selectedColNames <- gsub("[-()]", "", selectedColNames)  
 
-#6. extract correct data, bind, label columns desciptively
+#6. extract correct data, bind
   x_data <- x_data[selectedCols]
   allData <- cbind(s_data, y_data, x_data)
+# label columns desciptively 
   colnames(allData) <- c("subjectID", "Activity", selectedColNames)
+  allData$Activity <- factor(allData$Activity, levels = a_label[,1], labels = a_label[,2])
+  allData$subjectID <- as.factor(allData$subjectID)
+  
+#7. create a tidy data set
+  meltedData <- melt(allData, id = c("subjectID", "Activity"))
+  tidyData <- dcast(meltedData, subjectID + Activity ~ variable, mean)
+  
+  write.table(tidyData, "./tidy_dataset.txt", row.names = FALSE, quote = FALSE)
   
